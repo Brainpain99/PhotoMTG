@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PhotoMTG</string>
+    <string name="button_text_1">Karte aufnehmen</string>
+    <string name="Card_Image">Kartenbild</string>
+</resources>
