@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -71,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
         
         this.buttonImage = this.findViewById(R.id.button);
         resultTextView = findViewById(R.id.result);
+        resultTextView.setMovementMethod(new ScrollingMovementMethod());
+
         this.buttonImage.setOnClickListener(v -> {
             captureImage();
         });
@@ -211,8 +214,7 @@ public class MainActivity extends AppCompatActivity {
                 .getTextAnnotations();
         if (texts != null) {
             for (EntityAnnotation text : texts) {
-                message.append(String.format(Locale.getDefault(), "%s: %s",
-                        text.getLocale(), text.getDescription()));
+                message.append(String.format(Locale.getDefault(), "%s", text.getDescription()));
                 message.append("\n");
             }
         } else {
@@ -236,11 +238,11 @@ public class MainActivity extends AppCompatActivity {
                     JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
                     Vision.Builder builder = new Vision.Builder
                             (httpTransport, jsonFactory, credential);
+                    builder.setApplicationName("PhotoMTG");
                     Vision vision = builder.build();
                     List<Feature> featureList = new ArrayList<>();
                     Feature textDetection = new Feature();
                     textDetection.setType("TEXT_DETECTION");
-                    textDetection.setMaxResults(10);
                     featureList.add(textDetection);
                     List<AnnotateImageRequest> imageList = new ArrayList<>();
                     AnnotateImageRequest annotateImageRequest = new AnnotateImageRequest();
