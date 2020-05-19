@@ -2,4 +2,6 @@
     <string name="app_name">PhotoMTG</string>
     <string name="button_text_1">Karte aufnehmen</string>
     <string name="Card_Image">Kartenbild</string>
+    <string name="Ergebnis_Text_1">Ergebnis</string>
+    <string name="Ergebnis_Text_2">Retrieving results from cloud</string>
 </resources>
