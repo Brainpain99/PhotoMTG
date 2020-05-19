@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -39,7 +38,6 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static String accessToken;
     Account googleAccount;
+    PhotoHandler photohandler = new PhotoHandler();
     Uri pictureUri;
     String filePath;
 
@@ -143,29 +142,13 @@ public class MainActivity extends AppCompatActivity {
     //Save the picture to created file
     private void captureImage() {
 
-        //Create file if it doesn't exist.
-        File picFolder = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "/PhotoMTG");
-        if (!picFolder.exists()) {
-            picFolder.mkdirs();
-        }
-
-        //Save the picture in file and give it a set name. (MTGCard_<Number>.png)
-        int imgNum = 0;
-        String fileName = "MTGCard_"+imgNum+".png";
-        File file = new File(picFolder,fileName);
-
-        //If the picture number exist count the Number up.
-        while (file.exists()){
-            imgNum++;
-            fileName = "MTGCard_"+imgNum+".png";
-            file = new File(picFolder,fileName);
-        }
+        File pictureFile = photohandler.createFile();
 
         // Create an implicit intent, for image capture.
-        pictureUri = FileProvider.getUriForFile(getApplicationContext(),  BuildConfig.APPLICATION_ID + ".fileprovider",file);
+        pictureUri = FileProvider.getUriForFile(getApplicationContext(),  BuildConfig.APPLICATION_ID + ".fileprovider",pictureFile);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, pictureUri);
-        filePath = file.getAbsolutePath();
+        filePath = pictureFile.getAbsolutePath();
 
         // Start camera and wait for the results.
         this.startActivityForResult(intent, REQUEST_ID_IMAGE_CAPTURE);
@@ -194,16 +177,6 @@ public class MainActivity extends AppCompatActivity {
             new GoogleHandler(MainActivity.this, googleAccount, SCOPE, REQUEST_ACCOUNT_AUTHORIZATION)
                     .execute();
         }
-    }
-
-    //Convert Image for text recognition
-    public Image getBase64EncodedJpeg(Bitmap bitmap) {
-        Image image = new Image();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
-        byte[] imageBytes = byteArrayOutputStream.toByteArray();
-        image.encodeContent(imageBytes);
-        return image;
     }
 
     //Convert response from Google Cloud Vision to output-String for display
@@ -246,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                     featureList.add(textDetection);
                     List<AnnotateImageRequest> imageList = new ArrayList<>();
                     AnnotateImageRequest annotateImageRequest = new AnnotateImageRequest();
-                    Image base64EncodedImage = getBase64EncodedJpeg(bitmap);
+                    Image base64EncodedImage = photohandler.getBase64EncodedJpeg(bitmap);
                     annotateImageRequest.setImage(base64EncodedImage);
                     annotateImageRequest.setFeatures(featureList);
                     imageList.add(annotateImageRequest);
